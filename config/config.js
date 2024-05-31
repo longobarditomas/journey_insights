@@ -4,4 +4,5 @@ module.exports = {
   port: process.env.PORT || 8000,
   openWeatherApiKey: process.env.OPEN_WEATHER_API_KEY,
   newsApiKey: process.env.NEWS_API_KEY,
+  openCageDataApiKey: process.env.OPEN_CAGE_DATA_API_KEY,
 };

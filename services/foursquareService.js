@@ -1,9 +1,10 @@
 const axios = require('axios');
 const { foursquareApiKey } = require('../config/config');
 
-const getFoursquareMapsService = async (latitude, longitud) => {
+const getFoursquareMapsService = async (latitude, longitud, category) => {
     const lat = latitude || "-34.607741";
     const lon = longitud || "-58.438561";
+    const cat = category || 13065;
     try {
         const token = foursquareApiKey || "";
         const config = {
@@ -12,7 +13,7 @@ const getFoursquareMapsService = async (latitude, longitud) => {
                 'Content-type' : "application/json"
             }
         }
-        const url = encodeURI(`https://api.foursquare.com/v3/places/search?session_token=${token}&ll=${lat},${lon}`);
+        const url = encodeURI(`https://api.foursquare.com/v3/places/search?sort=POPULARITY&session_token=${token}&ll=${lat},${lon}&categories=${cat}`);
         const response = await axios.get(url, config);
         return response.data;
     } catch (error) {

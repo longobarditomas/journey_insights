@@ -1,12 +1,13 @@
 const { getWeatherData }  = require('../services/weatherService');
 const { getNewsData }     = require('../services/newsService');
 const { getOpenCageData } = require('../services/openCageService');
+const { getFoursquareMapsService } = require('../services/foursquareService');
 
 const getCountryInsights = async (req, res, next) => {
   try {
     const city = req.query.city || "london";
     const country = req.query.country || "UK";
-  
+
     const countryInsights = await getInsights(city, country);
     res.status(200).send(countryInsights);
   } catch (error) {
@@ -22,9 +23,12 @@ async function getInsights(city, country) {
     newsData = await getNewsData(weatherData.sys.country);
 
   const openCageData = await getOpenCageData(city, country);
-
+  
   const weather  = parseWeatherData(weatherData);   
   const currency = parseCurrencyData(openCageData.results[0].annotations.currency); 
+  
+  const foursquareData = await getFoursquareMapsService(weatherData.coord.lat, weatherData.coord.lon);
+  const restaurantes = parseRestauranteData(foursquareData.results); 
 
   const countryInsights = {
     city : city,
@@ -34,6 +38,7 @@ async function getInsights(city, country) {
     weather : weather,
     currency : currency,
     news : newsData.articles,
+    restaurantes : restaurantes,
   }
   return countryInsights;
 }
@@ -60,6 +65,17 @@ function parseCurrencyData(currencyData) {
     iso_numeric : currencyData.iso_numeric,
     symbol : currencyData.symbol,
   }
+}
+
+function parseRestauranteData(restauranteData) {
+  return restauranteData.map(four => {
+    return {
+      name: four.name,
+      location: four.location,
+      geocodes: four.geocodes.main,
+      categories: four.categories.map(categ => categ.name),
+    };
+  })
 }
 
 module.exports = { getCountryInsights };

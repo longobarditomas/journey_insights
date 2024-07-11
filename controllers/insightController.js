@@ -28,8 +28,11 @@ async function getInsights(city, country) {
   const weather  = parseWeatherData(weatherData);   
   const currency = parseCurrencyData(openCageData.results[0].annotations.currency); 
   
-  const foursquareData = await getFoursquareMapsService(coords.lat, coords.lon);
-  const restaurantes = parseRestauranteData(foursquareData.results); 
+  const restaurantesData = await getFoursquareMapsService(coords.lat, coords.lon);
+  const restaurantes     = parseRestauranteData(restaurantesData); 
+  
+  const museumsData = await getFoursquareMapsService(coords.lat, coords.lon, "4bf58dd8d48988d181941735");
+  const museums     = parseMuseumsData(museumsData); 
 
   const countryInsights = {
     city : city,
@@ -40,6 +43,7 @@ async function getInsights(city, country) {
     currency : currency,
     news : newsData.articles,
     restaurantes : restaurantes,
+    museums : museums,
   }
   return countryInsights;
 }
@@ -76,6 +80,18 @@ function parseRestauranteData(restauranteData) {
       geocodes: restaurant.geocodes.main,
       distance: restaurant.distance,
       categories: restaurant.categories.map(categ => categ.name),
+    };
+  })
+}
+
+function parseMuseumsData(museumsData) {
+  return museumsData.sort((a,b) => a.distance - b.distance).map(museum => {
+    return {
+      name: museum.name,
+      location: museum.location,
+      geocodes: museum.geocodes.main,
+      distance: museum.distance,
+      categories: museum.categories.map(categ => categ.name),
     };
   })
 }

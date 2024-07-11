@@ -15,7 +15,7 @@ const getFoursquareMapsService = async (latitude, longitud, category) => {
         }
         const url = encodeURI(`https://api.foursquare.com/v3/places/search?sort=POPULARITY&session_token=${token}&ll=${lat},${lon}&categories=${cat}`);
         const response = await axios.get(url, config);
-        return response.data;
+        return response.data.results;
     } catch (error) {
         console.log(error.response.data);
     }

@@ -4,7 +4,7 @@ const { foursquareApiKey } = require('../config/config');
 const getFoursquareMapsService = async (latitude, longitud, category) => {
     const lat = latitude || "-34.607741";
     const lon = longitud || "-58.438561";
-    const cat = category || 13065;
+    const cat = category || "4d4b7105d754a06374d81259";
     try {
         const token = foursquareApiKey || "";
         const config = {

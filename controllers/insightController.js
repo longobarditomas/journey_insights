@@ -17,7 +17,8 @@ const getCountryInsights = async (req, res, next) => {
 
 async function getInsights(city, country) {
   const weatherData = await getWeatherData(city, country);
-    
+  
+  const coords = weatherData.coord;
   let newsData = {};
   if (weatherData.sys.country)
     newsData = await getNewsData(weatherData.sys.country);
@@ -27,14 +28,14 @@ async function getInsights(city, country) {
   const weather  = parseWeatherData(weatherData);   
   const currency = parseCurrencyData(openCageData.results[0].annotations.currency); 
   
-  const foursquareData = await getFoursquareMapsService(weatherData.coord.lat, weatherData.coord.lon);
+  const foursquareData = await getFoursquareMapsService(coords.lat, coords.lon);
   const restaurantes = parseRestauranteData(foursquareData.results); 
 
   const countryInsights = {
     city : city,
     country : country,
     flag : openCageData.results[0].annotations.flag,
-    coordinates : weatherData.coord,
+    coordinates : coords,
     weather : weather,
     currency : currency,
     news : newsData.articles,
@@ -68,12 +69,13 @@ function parseCurrencyData(currencyData) {
 }
 
 function parseRestauranteData(restauranteData) {
-  return restauranteData.map(four => {
+  return restauranteData.sort((a,b) => a.distance - b.distance).map(restaurant => {
     return {
-      name: four.name,
-      location: four.location,
-      geocodes: four.geocodes.main,
-      categories: four.categories.map(categ => categ.name),
+      name: restaurant.name,
+      location: restaurant.location,
+      geocodes: restaurant.geocodes.main,
+      distance: restaurant.distance,
+      categories: restaurant.categories.map(categ => categ.name),
     };
   })
 }

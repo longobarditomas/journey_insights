@@ -28,11 +28,14 @@ async function getInsights(city, country) {
   const weather  = parseWeatherData(weatherData);   
   const currency = parseCurrencyData(openCageData.results[0].annotations.currency); 
   
-  const restaurantesData = await getFoursquareMapsService(coords.lat, coords.lon);
-  const restaurantes     = parseRestauranteData(restaurantesData); 
+  const restaurantsData = await getFoursquareMapsService(coords.lat, coords.lon);
+  const restaurants     = restaurantsData ? parseFoursquareData(restaurantsData) : []; 
   
   const museumsData = await getFoursquareMapsService(coords.lat, coords.lon, "4bf58dd8d48988d181941735");
-  const museums     = parseMuseumsData(museumsData); 
+  const museums     = museumsData ? parseFoursquareData(museumsData) : []; 
+  
+  const attractionsData = await getFoursquareMapsService(coords.lat, coords.lon, "5109983191d435c0d71c2bb1");
+  const attractions     = attractionsData ? parseFoursquareData(attractionsData) : []; 
 
   const countryInsights = {
     city : city,
@@ -42,8 +45,9 @@ async function getInsights(city, country) {
     weather : weather,
     currency : currency,
     news : newsData.articles,
-    restaurantes : restaurantes,
+    restaurants : restaurants,
     museums : museums,
+    attractions : attractions,
   }
   return countryInsights;
 }
@@ -72,26 +76,14 @@ function parseCurrencyData(currencyData) {
   }
 }
 
-function parseRestauranteData(restauranteData) {
-  return restauranteData.sort((a,b) => a.distance - b.distance).map(restaurant => {
+function parseFoursquareData(fsData) {
+  return fsData.sort((a,b) => a.distance - b.distance).map(data => {
     return {
-      name: restaurant.name,
-      location: restaurant.location,
-      geocodes: restaurant.geocodes.main,
-      distance: restaurant.distance,
-      categories: restaurant.categories.map(categ => categ.name),
-    };
-  })
-}
-
-function parseMuseumsData(museumsData) {
-  return museumsData.sort((a,b) => a.distance - b.distance).map(museum => {
-    return {
-      name: museum.name,
-      location: museum.location,
-      geocodes: museum.geocodes.main,
-      distance: museum.distance,
-      categories: museum.categories.map(categ => categ.name),
+      name: data.name,
+      location: data.location,
+      geocodes: data.geocodes.main,
+      distance: data.distance,
+      categories: data.categories.map(categ => categ.name),
     };
   })
 }
